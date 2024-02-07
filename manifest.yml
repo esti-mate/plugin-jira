@@ -1,0 +1,43 @@
+modules:
+  jira:globalPage:
+    - key: plugin-jira-hello-world
+      function: main
+      title: EstiMate
+
+  jira:customFieldType:
+    - key: esti-mate-custom-field
+      name: Predicted Estimation
+      description: Custom field type.
+      type: object
+      function: prediction-value
+      readOnly: true
+      formatter:
+        expression: "`${value.value}`"
+
+  jira:issuePanel:
+    - key: esti-mate-issue-panel
+      function: issue-panel
+      title: EstiMate - Issue Estimation Panel
+      icon: https://static.vecteezy.com/system/resources/previews/021/059/827/original/chatgpt-logo-chat-gpt-icon-on-white-background-free-vector.jpg
+
+  function:
+    - key: main
+      handler: index.runSettingsPage
+
+    - key: prediction-value
+      handler: index.runPredictionFieldView
+
+    - key: issue-panel
+      handler: index.runIssuePanel
+
+app:
+  id: ari:cloud:ecosystem::app/1fbb6d41-6479-4ada-9433-f5e386c5c019
+
+permissions:
+  scopes:
+    - read:jira-work
+  external:
+    fetch:
+      backend:
+        - localhost
+        - esti-mate.xyz
