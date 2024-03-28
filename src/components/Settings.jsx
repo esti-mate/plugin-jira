@@ -1,52 +1,121 @@
-import  ForgeUI,{  Text, Fragment , Select, Button, Form , Heading   } from '@forge/ui';
+import  ForgeUI,{  Text, Fragment , Select, Button, Form , Heading,useState , SectionMessage    } from '@forge/ui';
+import {invokeApi} from "../utils/invokeEndpoint"
+import api , { route} from "@forge/api"
+
 
 export const App = () => {
+  const [filters,setFilters] =useState(getFilters)
+
+  // useEffect(()=>{
+  //   getFilters().then((res)=>{
+  //     console.log({res});
+  //     setFilters(res)
+  //   })
+  
+  // },[])
+
+  console.log({filters});
   return (
     <Fragment>
-      <Heading size='medium' >Tech how to estimate</Heading>
+      <Heading size="medium">Tech how to estimate</Heading>
       <Text>Select historic data of your project</Text>
-      <Form  onSubmit={(props)=>{
-        console.log(props)
-        return startAJob(props).then((res)=>{
-          console.log({res});
+      <Form
+        onSubmit={(props) => {
+          const filter = filters.filter((filter)=>filter.id === props.filter)[0];
+          console.log("form props:",props);
+          console.log("filter jql:", filter.jql);
 
-
-
-         }) 
-        
-        
-        }} >
-      <Select name="filter"  label='Select a Filter' ></Select>
-
+          return handleTrainJob(filter.jql, "org_02")
+        }}
+      >
+        <Select name="filter" label="Select a Filter">
+            {
+              filters.map((filter)=>(
+                <Option value={filter.id} label={filter.name}/>
+              ))
+            }
+        </Select>
+        <SectionMessage appearance="warning">
+          <Text>
+            Esti-mate is learning your estimation patters
+          </Text>
+        </SectionMessage>
       </Form>
-
     </Fragment>
   );
 };
 
+/**
+ * 
+ * @param {string} jql 
+ * @param {string} org_id 
+ * @returns {Promise<{jobid:string}>
+ */
+const handleTrainJob =async (jql,org_id, )=>{
+  try {
+    const res = await export_dataset(jql)
+    let gs_path = res.gs_path;  
+    const gs_path_list =  gs_path.split("/");
+    gs_path = gs_path_list[gs_path_list.length-2] + "/" + gs_path_list[gs_path_list.length-1];
+
+    const jobRes = await startAJob({train_ds_path:gs_path,org_id:org_id});
+
+    console.log("jobRes : ",jobRes);
+
+
+    return jobRes;
+    
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+/**
+ * 
+ * @param { { train_ds_path: string; org_id: string; } } props 
+ * @returns 
+ */
 const startAJob = async (props) => {
-  console.log("Calling ")
-  var myHeaders = new Headers();
-myHeaders.append("Accept", "*/*");
-myHeaders.append("User-Agent", "Thunder Client (https://www.thunderclient.com)");
-myHeaders.append("Content-Type", "application/json");
+  console.log("Calling start a job on ds_path : ",props.train_ds_path);
+  
+  const body = {
+    display_name: `${props.org_id}-job`,
+    machine_type: config.TRAIN_MACHINE_TYPE,
+    train_ds_path: props.train_ds_path ,
+    org_id: props.org_id,
+    sequence_length: config.TRAIN_SEQUENCE_LENGTH,
+    batch_size_ratio:config.TRAIN_BATCH_SIZE_RATIO,
+    epoch: config.TRAIN_EPOCH
+  };
 
-var raw = JSON.stringify({
-  "project_id": "esti-mate-411304",
-  "location": "us-central1",
-  "display_name": "GTP2SP train -2.6",
-  "container_image_uri": "gcr.io/esti-mate-411304/your-tpu-image",
-  "machine_type": "n1-standard-8",
-  "tpu_type": "v2-8",
-  "tpu_cores": 8
-});
-
-var requestOptions = {
-  method: 'POST',
-  headers: myHeaders,
-  body: raw,
-  redirect: 'follow'
+  return await invokeApi("start-train-job", "POST", body);
 };
 
- return fetch("http://localhost:8081/start-training", requestOptions)
+/**
+ * 
+ * @param {string} jql 
+ * @returns {Promise<{gs_path:string}>}
+ */
+const export_dataset = async (jql) => {
+  console.log("Calling export dataset : ",jql);
+  
+  const body = {
+    jql
+  };
+
+  return await invokeApi("export-csv", "POST", body);
+};
+
+const getFilters = async () => {
+  console.log("fetching issue");
+  const issueResponse = await api
+    .asUser()
+    .requestJira(route`/rest/api/2/filter/my`);
+  
+  const res = await issueResponse.json();
+  
+  console.log("filter count : ",res.length);
+  return  []
 }
+
