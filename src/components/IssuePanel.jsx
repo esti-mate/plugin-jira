@@ -6,7 +6,7 @@ import ForgeUI, {
   useEffect,
   useProductContext,
   useState,
-} from "@forge/ui";
+} from "@forge/react";
 
 import api, { route } from "@forge/api";
 import { ResultCard } from "./ReusltCard";

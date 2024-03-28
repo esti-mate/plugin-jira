@@ -1,4 +1,4 @@
-import ForgeUI,{ Text } from "@forge/ui";
+import ForgeUI,{ Text } from "@forge/react";
 
 
 function Field() {

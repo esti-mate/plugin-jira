@@ -1,4 +1,4 @@
-import ForgeUI, {Text, Tag, Fragment} from "@forge/ui"
+import ForgeUI, {Text, Tag, Fragment} from "@forge/react"
 
 export const ResultCard = (props) => {
     if (!props.prediction) return <Fragment><Text>No predictions have made</Text></Fragment>;

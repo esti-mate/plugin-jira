@@ -32,6 +32,9 @@ modules:
 
 app:
   id: ari:cloud:ecosystem::app/1fbb6d41-6479-4ada-9433-f5e386c5c019
+  runtime:
+    name: nodejs18.x
+    snapshots: false # Boolean
 
 permissions:
   scopes:
