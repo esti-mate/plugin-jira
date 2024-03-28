@@ -4,7 +4,7 @@ import Field from "./components/PredictionFieldView.jsx";
 import Panel from "./components/IssuePanel.jsx";
 
 export const runSettingsPage = render(
-  <GlobalPage>
+  <GlobalPage >
     <App/>
   </GlobalPage>
 );
